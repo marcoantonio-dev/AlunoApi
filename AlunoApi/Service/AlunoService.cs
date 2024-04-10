@@ -56,8 +56,8 @@ namespace AlunoApi.Service
             //Nesse caso. Sem estar utilizando um trycath, ou uma validação com ifElse.
             //Necessitariamos de uma implementação de um Middleware de Erros global.
 
-            var alunos = await _context.Aluno.FindAsync(id);
-            return alunos;
+            Aluno aluno = await _context.Aluno.FindAsync(id);
+            return aluno;
         }
 
         public async Task CreateAluno(Aluno aluno)

@@ -14,6 +14,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Cors;
+
 
 namespace AlunoApi
 {
@@ -37,6 +39,28 @@ namespace AlunoApi
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "AlunoApi", Version = "v1" });
             });
+
+            services.AddCors(options =>
+            {
+                options.AddPolicy("AllowSpecificOrigin",
+                    builder =>
+                    {
+                        builder.WithOrigins("http://localhost:3000")
+                            .AllowAnyMethod()
+                            .AllowAnyHeader();
+                    });
+            });
+
+            /*services.AddCors(options =>
+            {
+                options.AddDefaultPolicy(builder =>
+                {
+                    builder
+                        .AllowAnyOrigin() // Allows any origin to access the API. Consider restricting this in production.
+                        .AllowAnyMethod() // Allows any HTTP method. Consider restricting this in production.
+                        .AllowAnyHeader(); // Allows any header. Consider restricting this in production.
+                });
+            });*/
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -48,9 +72,18 @@ namespace AlunoApi
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "AlunoApi v1"));
             }
 
+            /*app.UseCors(options =>
+            {
+                options.WithOrigins("http://localhost:3000/");
+                options.AllowAnyMethod();
+                options.AllowAnyHeader();
+            });*/
+
+            app.UseSwagger();
             app.UseHttpsRedirection();
             app.UseRouting();
             app.UseAuthorization();
+            app.UseCors("AllowSpecificOrigin");
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();

@@ -2,5 +2,6 @@
 {
     public interface IAsyncEnumerable
     {
+        //development by Marco
     }
 }

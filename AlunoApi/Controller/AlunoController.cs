@@ -1,22 +1,21 @@
 ﻿using AlunoApi.Model;
-using AlunoApi.Service;
+using AlunosApi.Service;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using System.Linq;
-using System;
 
-namespace AlunoApi.Controller
+namespace AlunosApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     //[Produces("application/json")]
-    public class AlunoController : ControllerBase
+    public class AlunosController : ControllerBase
     {
-        private readonly IAlunoService _alunoService;
+        private IAlunoService _alunoService;
 
-        public AlunoController(IAlunoService alunoService)
+        public AlunosController(IAlunoService alunoService)
         {
             _alunoService = alunoService;
         }
@@ -31,36 +30,33 @@ namespace AlunoApi.Controller
             {
                 var alunos = await _alunoService.GetAlunos();
                 return Ok(alunos);
-
             }
             catch
             {
-
                 //return BadRequest("Request inválido");
                 return StatusCode(StatusCodes.Status500InternalServerError,
                     "Erro ao obter alunos");
-
             }
         }
 
-        [HttpGet("AlunoPorNome")]
-        public async Task<ActionResult<IAsyncEnumerable<Aluno>>> GetAlunosByName(string nome)
+        [HttpGet("AlunosPorNome")]
+        public async Task<ActionResult<IAsyncEnumerable<Aluno>>> GetAlunosByName([FromQuery] string nome)
         {
             try
             {
-                var alunos = await _alunoService.GetAlunosByName(nome);
-                if (alunos == null)
-                    return NotFound($"Não existem alunos com o critério {nome}");
-                ; return Ok(alunos);
+                var alunos = await _alunoService.GetAlunosByNome(nome);
 
+                if (alunos.Count() == 0)
+                    return NotFound($"Não existem alunos com o critério {nome}");
+
+                return Ok(alunos);
             }
             catch
             {
-
                 return BadRequest("Request inválido");
-
             }
         }
+
         [HttpGet("{id:int}", Name = "GetAluno")]
         public async Task<ActionResult<Aluno>> GetAluno(int id)
         {
@@ -69,16 +65,16 @@ namespace AlunoApi.Controller
                 var aluno = await _alunoService.GetAluno(id);
 
                 if (aluno == null)
-                    return NotFound($"Não existe aluno com id = {id}");
+                    return NotFound($"Não existem aluno com id={id}");
 
                 return Ok(aluno);
             }
             catch
             {
-
                 return BadRequest("Request inválido");
             }
         }
+
         [HttpPost]
         public async Task<ActionResult> Create(Aluno aluno)
         {
@@ -89,52 +85,50 @@ namespace AlunoApi.Controller
             }
             catch
             {
-
                 return BadRequest("Request inválido");
             }
         }
+
         [HttpPut("{id:int}")]
-        public async Task<ActionResult> UpdateAluno(int id, [FromBody] Aluno aluno)
+        public async Task<ActionResult> Edit(int id, [FromBody] Aluno aluno)
         {
             try
             {
-
                 if (aluno.Id == id)
                 {
                     await _alunoService.UpdateAluno(aluno);
                     //return NoContent();
-                    return Ok($"Aluno com id = {id} foi atualizado");
+                    return Ok($"Aluno com id={id} foi atualizado com sucesso");
                 }
                 else
-                    return BadRequest("Dados incosistentes");
+                {
+                    return BadRequest("Dados inconsistentes");
+                }
             }
             catch
             {
-
-                return BadRequest("Request Inválido");
-
+                return BadRequest("Request inválido");
             }
         }
+
         [HttpDelete("{id:int}")]
-        public async Task<ActionResult> DeleteAluno(int id)
+        public async Task<ActionResult> Delete(int id)
         {
             try
             {
-
                 var aluno = await _alunoService.GetAluno(id);
                 if (aluno != null)
                 {
                     await _alunoService.DeleteAluno(aluno);
-                    return Ok($"O aluno com id = {id} foi excluido com sucesso");
+                    return Ok($"Aluno de id={id} foi excluido com sucesso");
                 }
                 else
                 {
-                    return NotFound($"Aluno com id = {id} não encontrado");
+                    return NotFound($"Aluno com id={id} não encontrado");
                 }
             }
-            catch 
+            catch
             {
-
                 return BadRequest("Request inválido");
             }
         }

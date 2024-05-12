@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore.Migrations;
-
+//development by Marco
 #nullable disable
 
 namespace AlunoApi.Migrations
